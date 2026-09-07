@@ -99,7 +99,7 @@ function update(){
 
  if(!a.value){document.getElementById("result").textContent="";return;}
  const whole=Number(a.value.replace(/,/g,""));
- if(!Number.isSafeInteger(whole)){document.getElementById("result").textContent="SOBRA KA NAMAN SA AKIN!!!";return;}
+ if(!Number.isSafeInteger(whole)){document.getElementById("result").textContent="AMOUNT TOO LARGE";return;}
 
  let text=words(whole)+" PESO"+(whole===1?"":"S");
  if(Number(cent)>0)text+=" AND "+cent+"/100";
@@ -152,9 +152,47 @@ amount.addEventListener("keydown",function(e){
  }
 });
 
-function copyResult(){
- const text=document.getElementById("result").textContent;
- if(text)navigator.clipboard.writeText(text);
+async function copyResult(){
+ const text=document.getElementById("result").textContent.trim();
+ if(!text) return;
+
+ // Try modern Clipboard API first.
+ try{
+   if(navigator.clipboard && window.isSecureContext){
+     await navigator.clipboard.writeText(text);
+     showCopyStatus("COPIED!");
+     return;
+   }
+ }catch(err){}
+
+ // Fallback for Google Sites / iframe environments.
+ try{
+   const ta=document.createElement("textarea");
+   ta.value=text;
+   ta.setAttribute("readonly","");
+   ta.style.position="fixed";
+   ta.style.left="-9999px";
+   ta.style.top="0";
+   document.body.appendChild(ta);
+   ta.focus();
+   ta.select();
+   ta.setSelectionRange(0,ta.value.length);
+   const ok=document.execCommand("copy");
+   document.body.removeChild(ta);
+   if(ok){
+     showCopyStatus("COPIED!");
+     return;
+   }
+ }catch(err){}
+
+ showCopyStatus("COPY FAILED — SELECT THE RESULT TO COPY");
+}
+
+function showCopyStatus(msg){
+ const btn=document.querySelector(".copy");
+ const original=btn.textContent;
+ btn.textContent=msg;
+ setTimeout(()=>btn.textContent=original,1200);
 }
 function clearAll(){
  amount.value="";
