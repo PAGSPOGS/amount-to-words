@@ -23,6 +23,15 @@ button{margin-top:20px;border:0;border-radius:11px;padding:16px 25px;font-size:2
 .copy{background:#0505d8}.clear{background:#d00}
 .hint{margin-top:18px;color:#777;font-size:16px}
 @media(max-width:700px){.grid{grid-template-columns:1fr}.card{padding:28px}input{font-size:26px}.suffix{font-size:25px}}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:9999;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-box{width:min(620px,94vw);background:#fff;border:5px solid #f22;border-radius:24px;padding:28px 24px 24px;text-align:center;box-shadow:0 20px 70px rgba(0,0,0,.45);animation:pop .18s ease-out}
+.modal-emoji{font-size:72px;line-height:1;margin-bottom:10px}
+.modal-title{font-size:clamp(28px,5vw,48px);font-weight:900;line-height:1.05;margin:0 0 24px;color:#111}
+.modal-title .red{color:#e00000}
+.modal-ok{background:#e00000;color:#fff;border:0;border-radius:12px;padding:14px 70px;font-size:24px;font-weight:900;cursor:pointer}
+@keyframes pop{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
 </style>
 </head>
 <body>
@@ -99,7 +108,7 @@ function update(){
 
  if(!a.value){document.getElementById("result").textContent="";return;}
  const whole=Number(a.value.replace(/,/g,""));
- if(!Number.isSafeInteger(whole)){document.getElementById("result").textContent="AMOUNT TOO LARGE";return;}
+ if(!Number.isSafeInteger(whole)){showTooLarge();return;}
 
  let text=words(whole)+" PESO"+(whole===1?"":"S");
  if(Number(cent)>0)text+=" AND "+cent+"/100";
@@ -206,6 +215,27 @@ window.addEventListener("load",function(){
   centavos.focus();
   centavos.select();
 });
+
+function showTooLarge(){
+  document.getElementById("tooLargeModal").classList.add("show");
+}
+function closeTooLarge(){
+  document.getElementById("tooLargeModal").classList.remove("show");
+  amount.focus();
+}
+document.getElementById("tooLargeModal").addEventListener("click",function(e){
+  if(e.target===this) closeTooLarge();
+});
 </script>
+
+<div class="modal" id="tooLargeModal" role="dialog" aria-modal="true" aria-labelledby="tooLargeTitle">
+  <div class="modal-box">
+    <div class="modal-emoji">😂💸</div>
+    <div class="modal-title" id="tooLargeTitle">
+      <span class="red">SOBRA SOBRA</span><br>NA YAN SAYO!!!
+    </div>
+    <button class="modal-ok" onclick="closeTooLarge()">OK</button>
+  </div>
+</div>
 </body>
 </html>
